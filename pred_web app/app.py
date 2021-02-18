@@ -10,6 +10,7 @@ import flask
 import plotly.express as px 
 import plotly.graph_objs as go # (need to pip install plotly==4.4.1)
 import plotly
+import dash_bootstrap_components as dbc
 # import warnings
 # import itertools
 # import numpy as np
@@ -25,11 +26,10 @@ import plotly
 
 
 
-# from pmdarima import auto_arima
-# chart_studio.tools.set_credentials_file(username='shhreyaa',                                              
-#                                   api_key='UGJfLKcZ6nznR80PcPL8')
 
-app = dash.Dash(__name__)
+app = dash.Dash(
+    external_stylesheets=[dbc.themes.BOOTSTRAP]
+)
 
 # ---------- Import and clean data (importing csv into pandas)
 
@@ -100,20 +100,13 @@ fig = go.Figure([
 
 ])
 
+
 fig.update_layout(
+    title="Total Sales",
+    xaxis_title="Time",
+    yaxis_title="Sales(In Million)",
+    height=750
    
-   height=700,
-   
-  
-    margin=dict(
-        l=50,
-        r=50,
-        b=10,
-        t=50,
-        pad=2
-    ),
-    # paper_bgcolor="LightSteelBlue",
-    # plot_bgcolor="LightSteelBlue",
 )
 
 
@@ -122,22 +115,21 @@ fig.update_layout(
 # App layout
 app.layout = html.Div([
     html.Div([
-         html.H1("Web Application Dashboards with Dash", style={'text-align': 'center'})
+         html.H1("Super Market Sales Prediction", style={'text-align': 'center','font-size':'100px'})
          ]),
     html.Div([
 
    
-    dcc.Graph(id='my_line', figure=fig)
+    dcc.Graph(id='my_line', figure=fig,style={'margin':'2%'})
 
 ],
- style={'width': '70%', 'display': 'inline-block',
-               'backgroundColor': '#22C1AD'
+ style={'width': '70%', 'display': 'inline-block'
                }),
     html.Div([
          html.Div([
-         html.H1("17.6%", style={'text-align': 'center'}),
+         html.H1("17.6%", style={'text-align': 'center','font-size':'100px'}),
          html.H2("Estimated growth for the upcoming year")
-         ],style={'width': '70%', 'display': 'inline-block', 'padding':'5%'
+         ],style={'width': '80%', 'display': 'inline-block', 'padding':'5%','background' :'linear-gradient(150deg, #153F7F, #297DFD 100%)','border-radius':'25px','border-shadow':'5px 5px 10px','color':'white'
                }
                   ),
            html.Br(),
@@ -153,7 +145,7 @@ app.layout = html.Div([
       style_data_conditional=[
         {
             'if': {'row_index': 'odd'},
-            'backgroundColor': 'rgb(248, 248, 248)'
+            'backgroundColor': '#C9DEFE'
         }
     ],
         style_cell_conditional=[
@@ -162,20 +154,28 @@ app.layout = html.Div([
             'textAlign': 'left'
         }],
     style_header={
-        'backgroundColor': 'rgb(230, 230, 230)',
-        'fontWeight': 'bold'
+        'backgroundColor': '#1F5EBE',
+        'textAlign':'Center',
+        'fontWeight': 'bold',
+        'height':'60px',
+          'color':'#fff',
+          'font-size':'20px'
     },
     
 )
 ],
               style={'width': '29%', 'display': 'inline-block',
-                     'align':'right','position':'absolute','margin':'50px 0px'
+                     'align':'right','position':'absolute','margin':'50px 0px','border-shadow':'5px 5px 10px'
                }),
     
 
 #side component
 #For individual prediction
 html.Div([
+   html.H1(["Individual Sales Prediction"],style={'text-align': 'center','margin-top':'30px','font-size':'60px','letter-spacing':'3px'}),
+   html.Br(),
+   html.Br(),
+   html.H3(["Please choose a category"],style={'text-align': 'center'}),
    
     dcc.RadioItems(
     options=[
@@ -184,20 +184,38 @@ html.Div([
         {'label': 'Technology', 'value': 'Technology'}
     ],
     id= 'radio-items',
-    value='Technology',
-    labelStyle={'display': 'inline-block'}
+    value='Furniture',
+    labelStyle={'display': 'inline-block','padding':'10px','font-size':'25px'},
+    inputStyle={"margin-right": "5px"},
+    style= {'display':'flex','align-items':'center','justify-content':'center'}
 ),
-    html.Div(id='output_container', children=[]),
+   
+    html.Div(id='output_container', children=[],style={'text-align': 'center','font-size':'30px','font-weight':'bold'}),
     html.Br(),
     
     dcc.Graph(
-    id='individual_pred'),
+    id='individual_pred',style={'font-size': '20px'}),
+    html.Div([
     html.H1(
-    id='expected_growth', children=[]),
+    id='expected_growth', children=[],style={'text-align': 'center'})
     
-]),
-
+    ],
+             style={'width': '35%', 'display': 'inline-block', 'padding':'50px','background' :'linear-gradient(150deg, #153F7F, #297DFD 100%)','border-radius':'25px','border-shadow':'5px 5px 10px','color':'white','margin-left':'100px'
+               }),
+     html.Div([
+    html.H2(
+    "Technology will Sale the highest in the upcoming years")
+    
+    ],
+             style={'width': '35%', 'display': 'inline-block', 'padding':'60px','background' :'linear-gradient(150deg, #153F7F, #297DFD 100%)','border-radius':'25px','border-shadow':'5px 5px 10px','color':'white','margin-left':'90px'
+               })
+    
+    
 ])
+
+],style={'margin':'30px'
+               })
+                      
 
 
 
@@ -214,7 +232,7 @@ html.Div([
 
 
 def make_line_chart(value):
-    container = "Time Series Prediction Graph for {} for 2018-2020 ".format(value)
+    container = "Time Series Prediction Graph for {} ".format(value)
     sale_category = df.loc[df["Category"] == "{}".format(value)]
     cols = ['Row ID', 'Customer ID', 'Segment', 'Product ID', 'Category', 'Sub-Category', 'Product Name', 'Quantity', 'Discount', 'Profit']
     sale_category.drop(cols, axis=1, inplace=True)
@@ -256,9 +274,18 @@ def make_line_chart(value):
         marker=dict(color='blue', size=5),
         showlegend=True
     )
+     
 
 
     ])
+    figure.update_layout(
+    title="Total Sales",
+    
+    xaxis_title="Time",
+    yaxis_title="Sales(In Million)",
+    height=800
+   
+)
     return figure,container,expected_growth
 
     
